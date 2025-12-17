@@ -2,11 +2,13 @@
 
 #include <string>
 
-class WeatherClient;
+namespace weather {
+    class WeatherClient;
+}
 
 class CLI {
 public:
-    explicit CLI(WeatherClient& client);
+    explicit CLI(weather::WeatherClient& client);
 
     void runInteractive();
     int runCommandLine(int argc, char* argv[]);
@@ -15,5 +17,5 @@ public:
     static void printUsageStatic(const std::string& program);
 
 private:
-    WeatherClient& client_;
+    weather::WeatherClient& client_;
 };

@@ -4,12 +4,15 @@
 #include <string>
 #include <vector>
 
-class WeatherClient;
+namespace weather {
+    class WeatherClient;
+}
+
 class Command;
 
 class CommandParser {
 public:
     static std::unique_ptr<Command>
-    parse(WeatherClient& client,
+    parse(weather::WeatherClient& client,
           const std::vector<std::string>& tokens);
 };

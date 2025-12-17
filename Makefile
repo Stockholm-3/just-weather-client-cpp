@@ -45,16 +45,18 @@ CFLAGS   := $(CFLAGS_BASE)   -w $(INCLUDES)
 JANSSON_CFLAGS := $(CFLAGS) -Ilib/jansson
 
 LDFLAGS :=
-LIBS    :=
+LIBS    := -ljansson
 
 # ------------------------------------------------------------
 # Source files
 # ------------------------------------------------------------
 CPP_SRC := $(shell find $(SRC_DIR) -type f -name '*.cpp')
+C_SRC   := $(shell find $(SRC_DIR) -type f -name '*.c')
 
 CPP_OBJ := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/src/%.o,$(CPP_SRC))
+C_OBJ   := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/src/%.o,$(C_SRC))
 
-OBJ := $(CPP_OBJ)
+OBJ := $(CPP_OBJ) $(C_OBJ)
 DEP := $(OBJ:.o=.d)
 
 # ------------------------------------------------------------
@@ -74,6 +76,12 @@ $(BUILD_DIR)/src/%.o: $(SRC_DIR)/%.cpp
 	@echo "Compiling C++ $<..."
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Compile C sources
+$(BUILD_DIR)/src/%.o: $(SRC_DIR)/%.c
+	@echo "Compiling C $<..."
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 # ------------------------------------------------------------
 # Utilities

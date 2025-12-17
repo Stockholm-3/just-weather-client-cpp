@@ -17,7 +17,8 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        WeatherClient client{"localhost", 10680};
+        weather::ClientConfig config{"localhost", 10680};
+        weather::WeatherClient client{config};
         CLI cli{client};
 
         std::string cmd = argv[1];
