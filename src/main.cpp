@@ -4,10 +4,10 @@
 #include <iostream>
 
 enum class ExitCode {
-    Ok = 0,
-    InvalidArgs = 1,
+    Ok           = 0,
+    InvalidArgs  = 1,
     NetworkError = 2,
-    ServerError = 3
+    ServerError  = 3
 };
 
 int main(int argc, char* argv[]) {
@@ -17,9 +17,9 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        weather::ClientConfig config{"localhost", 10680};
+        weather::ClientConfig  config{"localhost", 10680};
         weather::WeatherClient client{config};
-        CLI cli{client};
+        CLI                    cli{client};
 
         std::string cmd = argv[1];
         if (cmd == "interactive" || cmd == "-i") {
@@ -32,8 +32,7 @@ int main(int argc, char* argv[]) {
             cli.printUsage(argv[0]);
         }
         return rc;
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return static_cast<int>(ExitCode::NetworkError);
     }

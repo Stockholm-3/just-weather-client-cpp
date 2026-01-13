@@ -2,9 +2,9 @@
 
 #include <jansson.h>
 #include <memory>
-#include <string>
 #include <optional>
 #include <stdexcept>
+#include <string>
 
 namespace weather {
 
@@ -12,7 +12,7 @@ namespace weather {
  * Exception class for weather client errors
  */
 class WeatherClientException : public std::runtime_error {
-public:
+  public:
     explicit WeatherClientException(const std::string& message)
         : std::runtime_error(message) {}
 };
@@ -21,7 +21,7 @@ public:
  * RAII wrapper for jansson json_t objects
  */
 class JsonPtr {
-public:
+  public:
     explicit JsonPtr(json_t* ptr = nullptr) : ptr_(ptr) {}
 
     ~JsonPtr() {
@@ -40,26 +40,26 @@ public:
             if (ptr_) {
                 json_decref(ptr_);
             }
-            ptr_ = other.ptr_;
+            ptr_       = other.ptr_;
             other.ptr_ = nullptr;
         }
         return *this;
     }
 
     // Delete copy operations
-    JsonPtr(const JsonPtr&) = delete;
+    JsonPtr(const JsonPtr&)            = delete;
     JsonPtr& operator=(const JsonPtr&) = delete;
 
     json_t* get() const { return ptr_; }
     json_t* release() {
         json_t* temp = ptr_;
-        ptr_ = nullptr;
+        ptr_         = nullptr;
         return temp;
     }
 
     explicit operator bool() const { return ptr_ != nullptr; }
 
-private:
+  private:
     json_t* ptr_;
 };
 
@@ -67,9 +67,9 @@ private:
  * Configuration for WeatherClient
  */
 struct ClientConfig {
-    std::string host = "localhost";
-    int port = 10680;
-    int timeout_ms = 5000;
+    std::string host       = "localhost";
+    int         port       = 10680;
+    int         timeout_ms = 5000;
 
     ClientConfig() = default;
     ClientConfig(const std::string& h, int p) : host(h), port(p) {}
@@ -79,7 +79,7 @@ struct ClientConfig {
  * Main weather client class using OOP principles
  */
 class WeatherClient {
-public:
+  public:
     /**
      * Constructor with configuration
      * @throws WeatherClientException if initialization fails
@@ -92,7 +92,7 @@ public:
     ~WeatherClient();
 
     // Delete copy operations (non-copyable)
-    WeatherClient(const WeatherClient&) = delete;
+    WeatherClient(const WeatherClient&)            = delete;
     WeatherClient& operator=(const WeatherClient&) = delete;
 
     // Move operations
@@ -116,9 +116,10 @@ public:
      * @return JSON response wrapped in JsonPtr
      * @throws WeatherClientException on error
      */
-    JsonPtr getWeatherByCity(const std::string& city,
-                             const std::optional<std::string>& country = std::nullopt,
-                             const std::optional<std::string>& region = std::nullopt);
+    JsonPtr
+    getWeatherByCity(const std::string&                city,
+                     const std::optional<std::string>& country = std::nullopt,
+                     const std::optional<std::string>& region  = std::nullopt);
 
     /**
      * Search for cities by query
@@ -158,13 +159,13 @@ public:
      */
     const ClientConfig& getConfig() const { return config_; }
 
-private:
+  private:
     /**
      * Private implementation class (Pimpl idiom for hiding C dependencies)
      */
     class Impl;
 
-    ClientConfig config_;
+    ClientConfig          config_;
     std::unique_ptr<Impl> pimpl_;
 
     /**
@@ -176,8 +177,7 @@ private:
     /**
      * Helper method to make HTTP requests with caching
      */
-    JsonPtr makeRequest(const std::string& url,
-                       const std::string& cache_key);
+    JsonPtr makeRequest(const std::string& url, const std::string& cache_key);
 };
 
 } // namespace weather

@@ -112,5 +112,47 @@ help:
 	@echo "  make run          - Build and run (shows usage)"
 	@echo "  make test-current - Build and test current command"
 	@echo "  make BUILD_MODE=release - Build in release mode"
+	@echo "  make format          Check code formatting"
+	@echo "  make format-fix      Fix code formatting"
+	@echo "  make docs         - Generate Doxygen documentation"
+	@echo "  make clean-docs   - Remove generated documentation"
+
+# Show formatting errors without modifying files
+.PHONY: format
+format:
+	@echo "Checking formatting..."
+	@unformatted=$$(find . \( -name '*.cpp' -o -name '*.hpp' \) -print0 | \
+		xargs -0 clang-format -style=file -output-replacements-xml | \
+		grep -c "<replacement " || true); \
+	if [ $$unformatted -ne 0 ]; then \
+		echo "$$unformatted file(s) need formatting"; \
+		find . \( -name '*.cpp' -o -name '*.hpp' \) -print0 | \
+		xargs -0 clang-format -style=file -n -Werror; \
+		exit 1; \
+	else \
+		echo "All files properly formatted"; \
+	fi
+
+# Actually fixes formatting
+.PHONY: format-fix
+format-fix:
+	@echo "Applying clang-format..."
+	find . \( -name '*.cpp' -o -name '*.hpp' \) -print0 | xargs -0 clang-format -i -style=file
+	@echo "Formatting applied."
+
+# ------------------------------------------------------------
+# Documentation
+# ------------------------------------------------------------
+.PHONY: docs
+docs:
+	@echo "Generating documentation..."
+	@doxygen
+	@echo "Documentation generated in documentation/html/index.html"
+
+.PHONY: clean-docs
+clean-docs:
+	@echo "Removing documentation..."
+	@rm -rf documentation
+	@echo "Documentation removed."
 
 -include $(DEP)

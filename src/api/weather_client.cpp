@@ -9,8 +9,8 @@ extern "C" {
 
 #include <cstdio>
 #include <cstring>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 namespace weather {
 
@@ -22,9 +22,9 @@ namespace weather {
  * Hides C dependencies from the header
  */
 class WeatherClient::Impl {
-public:
-    HttpClient* http_client = nullptr;
-    ClientCache* cache = nullptr;
+  public:
+    HttpClient*  http_client = nullptr;
+    ClientCache* cache       = nullptr;
 
     explicit Impl(int timeout_ms) {
         http_client = http_client_create(timeout_ms);
@@ -49,36 +49,33 @@ public:
     }
 
     // Delete copy operations
-    Impl(const Impl&) = delete;
+    Impl(const Impl&)            = delete;
     Impl& operator=(const Impl&) = delete;
 };
 
 // WeatherClient implementation
 
 WeatherClient::WeatherClient(const ClientConfig& config)
-    : config_(config)
-    , pimpl_(std::make_unique<Impl>(config.timeout_ms)) {
-}
+    : config_(config), pimpl_(std::make_unique<Impl>(config.timeout_ms)) {}
 
 WeatherClient::~WeatherClient() = default;
 
 // Move constructor
 WeatherClient::WeatherClient(WeatherClient&& other) noexcept
-    : config_(std::move(other.config_))
-    , pimpl_(std::move(other.pimpl_)) {
-}
+    : config_(std::move(other.config_)),
+      pimpl_(std::move(other.pimpl_)) {}
 
 // Move assignment
 WeatherClient& WeatherClient::operator=(WeatherClient&& other) noexcept {
     if (this != &other) {
-        pimpl_ = std::move(other.pimpl_);
+        pimpl_  = std::move(other.pimpl_);
         config_ = std::move(other.config_);
     }
     return *this;
 }
 
 std::string WeatherClient::buildCacheKey(const std::string& endpoint,
-                                        const std::string& params) {
+                                         const std::string& params) {
     return endpoint + ":" + params;
 }
 
@@ -88,7 +85,7 @@ JsonPtr WeatherClient::makeRequest(const std::string& url,
     char* cached = client_cache_get(pimpl_->cache, cache_key.c_str());
     if (cached) {
         json_error_t json_err;
-        json_t* result = json_loads(cached, 0, &json_err);
+        json_t*      result = json_loads(cached, 0, &json_err);
         free(cached);
 
         if (result) {
@@ -113,7 +110,7 @@ JsonPtr WeatherClient::makeRequest(const std::string& url,
 
     // Parse JSON
     json_error_t json_err;
-    json_t* result = json_loads(body, 0, &json_err);
+    json_t*      result = json_loads(body, 0, &json_err);
     if (!result) {
         std::string error_msg = "JSON parse error: ";
         error_msg += json_err.text;
@@ -124,7 +121,7 @@ JsonPtr WeatherClient::makeRequest(const std::string& url,
     json_t* success_field = json_object_get(result, "success");
     if (success_field && json_is_boolean(success_field)) {
         if (!json_boolean_value(success_field)) {
-            json_t* error_obj = json_object_get(result, "error");
+            json_t*     error_obj = json_object_get(result, "error");
             std::string error_msg = "API error";
 
             if (error_obj) {
@@ -163,9 +160,10 @@ JsonPtr WeatherClient::getCurrentWeather(double lat, double lon) {
     return makeRequest(url.str(), cache_key);
 }
 
-JsonPtr WeatherClient::getWeatherByCity(const std::string& city,
-                                        const std::optional<std::string>& country,
-                                        const std::optional<std::string>& region) {
+JsonPtr
+WeatherClient::getWeatherByCity(const std::string&                city,
+                                const std::optional<std::string>& country,
+                                const std::optional<std::string>& region) {
     if (!validate_city_name(city.c_str())) {
         throw WeatherClientException("Invalid city name");
     }
@@ -198,25 +196,25 @@ JsonPtr WeatherClient::getWeatherByCity(const std::string& city,
     }
 
     // Normalize strings for cache key
-    char normalized_city[256] = "";
+    char normalized_city[256]    = "";
     char normalized_country[256] = "";
-    char normalized_region[256] = "";
+    char normalized_region[256]  = "";
 
-    normalize_string_for_cache(city.c_str(), normalized_city, sizeof(normalized_city));
+    normalize_string_for_cache(city.c_str(), normalized_city,
+                               sizeof(normalized_city));
 
     if (country.has_value()) {
         normalize_string_for_cache(country->c_str(), normalized_country,
-                                  sizeof(normalized_country));
+                                   sizeof(normalized_country));
     }
 
     if (region.has_value()) {
         normalize_string_for_cache(region->c_str(), normalized_region,
-                                  sizeof(normalized_region));
+                                   sizeof(normalized_region));
     }
 
     std::ostringstream params;
-    params << "city=" << normalized_city
-           << ":country=" << normalized_country
+    params << "city=" << normalized_city << ":country=" << normalized_country
            << ":region=" << normalized_region;
 
     std::string cache_key = buildCacheKey("weather", params.str());
@@ -242,7 +240,7 @@ JsonPtr WeatherClient::searchCities(const std::string& query) {
     // Normalize query for cache key
     char normalized_query[256];
     normalize_string_for_cache(query.c_str(), normalized_query,
-                              sizeof(normalized_query));
+                               sizeof(normalized_query));
 
     std::ostringstream params;
     params << "query=" << normalized_query;
